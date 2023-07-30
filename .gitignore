@@ -7,5 +7,6 @@ go.work
 *.dll
 
 # Project
+logs/
 mercury
 .env
