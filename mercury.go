@@ -37,7 +37,7 @@ func main() {
 
 	head, err := repo.Head()
 	if err != nil {
-		fmt.Println("Error getting commit objects:", err)
+		fmt.Println("Error getting head:", err)
 		os.Exit(1)
 	}
 
