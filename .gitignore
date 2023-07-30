@@ -1,0 +1,10 @@
+# Editor
+.vscode/
+
+# Go
+go.work
+*.exe
+*.dll
+
+# Project
+mercury
