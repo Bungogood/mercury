@@ -44,52 +44,52 @@ func preLine(input string, delim string) string {
 	// Join the lines back into a single string
 	result := strings.Join(lines, "\n")
 
-	return result
+	return result + "\n"
 }
 
 func gitDiff(repo *git.Repository, from, to *object.Commit) (string, error) {
-	diff, err := getDiffBetweenCommits(repo, from, to)
+	changes, err := getDiffBetweenCommits(repo, from, to)
 	if err != nil {
 		return "", err
 	}
 
-	for _, change := range diff {
+	diff := ""
+
+	for _, change := range changes {
 		fmt.Println(change.From.Name, change.To.Name)
 		patch, err := change.Patch()
 		if err != nil {
-			fmt.Println("Error getting patch:", err)
-			continue
+			return "", err
 		}
 
 		for _, patch := range patch.FilePatches() {
 			// from, to := patch.Files()
 			// fmt.Println(from.Path, to.Path)
 			// var previous diff.Chunk
-			prev := patch.Chunks()[0]
+			// prev := patch.Chunks()[0]
 			// cur := patch.Chunks()[1]
-			next := patch.Chunks()[1]
+			// next := patch.Chunks()[1]
 			for _, chunk := range patch.Chunks() {
 				switch chunk.Type() {
 				case 0: // Equal
-					fmt.Println("Equal")
+					// fmt.Println("Equal")
 				case 1: // Add
-					if prev.Type() == 0 {
-						fmt.Println(preLine(prev.Content(), "  "))
-					}
-					fmt.Println(preLine(chunk.Content(), "+ "))
-					if next.Type() == 0 {
-						fmt.Println(preLine(next.Content(), "  "))
-					}
+					// if prev.Type() == 0 {
+					// 	fmt.Println(preLine(prev.Content(), "  "))
+					// }
+					diff += preLine(chunk.Content(), "+ ")
+					// if next.Type() == 0 {
+					// 	fmt.Println(preLine(next.Content(), "  "))
+					// }
 				case 2: // Delete
-					fmt.Println(preLine(chunk.Content(), "- "))
+					diff += preLine(chunk.Content(), "- ")
 				}
-				prev = chunk
+				// prev = chunk
 			}
-			fmt.Println()
 		}
 	}
 
-	return "hello", nil
+	return diff, nil
 }
 
 func chatCompletion(prompt string) (openai.ChatCompletionResponse, error) {
@@ -143,17 +143,17 @@ func main() {
 	fmt.Println(child.Hash)
 	fmt.Println(parent.Hash)
 
-	gitDiff(repo, parent, child)
-
+	diff, err := gitDiff(repo, parent, child)
 	if err != nil {
-		fmt.Printf("ChatCompletion error: %v\n", err)
+		fmt.Printf("Diff Error: %v\n", err)
 		return
 	}
+	fmt.Println(diff)
 
-	resp, err := chatCompletion("Hello!")
-	if err != nil {
-		fmt.Printf("ChatCompletion error: %v\n", err)
-		return
-	}
-	fmt.Println(resp.Choices[0].Message.Content)
+	// resp, err := chatCompletion("Hello!")
+	// if err != nil {
+	// 	fmt.Printf("ChatCompletion error: %v\n", err)
+	// 	return
+	// }
+	// fmt.Println(resp.Choices[0].Message.Content)
 }
